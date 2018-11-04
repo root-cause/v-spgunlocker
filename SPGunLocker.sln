@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2041
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SPGunLocker", "SPGunLocker\SPGunLocker.csproj", "{52C1263C-F095-4BED-9DC1-2668F5412978}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{52C1263C-F095-4BED-9DC1-2668F5412978}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52C1263C-F095-4BED-9DC1-2668F5412978}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52C1263C-F095-4BED-9DC1-2668F5412978}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52C1263C-F095-4BED-9DC1-2668F5412978}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CB84FB5D-7F82-44E2-B1B4-A8900195E916}
+	EndGlobalSection
+EndGlobal
