@@ -46,6 +46,49 @@ namespace SPGunLocker
             }
         }
 
+        public static void LoadAddonWeapons()
+        {
+            try
+            {
+                string addonsPath = Path.Combine("scripts", Constants.AddonFolder);
+                if (Directory.Exists(addonsPath))
+                {
+                    string[] files = Directory.GetFiles(addonsPath, "*.xml", SearchOption.TopDirectoryOnly);
+                    foreach (string file in files)
+                    {
+                        try
+                        {
+                            Addon tempAddon = XmlUtil.Deserialize<Addon>(File.ReadAllText(file));
+
+                            foreach (AddonWeapon weapon in tempAddon.Weapons)
+                            {
+                                Weapons.Add(
+                                    (WeaponHash)Game.GenerateHash(weapon.WeaponName),
+
+                                    new AllowedWeapon(
+                                        weapon.DisplayName,
+                                        weapon.SlotType,
+                                        weapon.AvailableComponents,
+                                        Tuple.Create(weapon.AttachmentPositionOffset, weapon.AttachmentRotationOffset)
+                                    )
+                                );
+                            }
+
+                            Constants.LuxuryComponents.AddRange(tempAddon.LuxuryComponents.ConvertAll(c => Game.GenerateHash(c)));
+                        }
+                        catch (Exception e)
+                        {
+                            UI.Notify($"~r~SPGunLocker addon reading error: {e.Message} ({file})");
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                UI.Notify($"~r~SPGunLocker addon loading error: {e.Message}");
+            }
+        }
+
         public static Guid? FindInteractableGunLocker(Vector3 position)
         {
             foreach (Locker locker in Main.GunLockers.Values)
@@ -106,16 +149,16 @@ namespace SPGunLocker
         public static List<int> GetWeaponComponents(WeaponHash weapon)
         {
             int localPlayer = Game.Player.Character.Handle;
-            return Constants.AllowedWeapons[weapon].AvailableComponents.Where(c => Function.Call<bool>(Hash.HAS_PED_GOT_WEAPON_COMPONENT, localPlayer, (int)weapon, c)).ToList();
+            return Weapons.GetComponents(weapon).Where(c => Function.Call<bool>(Hash.HAS_PED_GOT_WEAPON_COMPONENT, localPlayer, (int)weapon, c)).ToList();
         }
 
         public static int GetWeaponLuxuryModel(List<int> weaponComponents)
         {
-            for (int i = 0; i < Constants.LuxuryComponents.Length; i++)
+            foreach (int component in Constants.LuxuryComponents)
             {
-                if (weaponComponents.Contains(Constants.LuxuryComponents[i]))
+                if (weaponComponents.Contains(component))
                 {
-                    return Function.Call<int>(Hash.GET_WEAPON_COMPONENT_TYPE_MODEL, Constants.LuxuryComponents[i]);
+                    return Function.Call<int>(Hash.GET_WEAPON_COMPONENT_TYPE_MODEL, component);
                 }
             }
 

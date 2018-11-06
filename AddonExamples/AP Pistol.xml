@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-16"?>
+<Addon xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Weapons>
+    <AddonWeapon>
+      <WeaponName>weapon_appistol</WeaponName>
+      <DisplayName>AP Pistol</DisplayName>
+      <SlotType>Small</SlotType>
+      <AvailableComponents>
+        <string>COMPONENT_APPISTOL_CLIP_01</string>
+        <string>COMPONENT_APPISTOL_CLIP_02</string>
+        <string>COMPONENT_AT_PI_FLSH</string>
+        <string>COMPONENT_AT_PI_SUPP</string>
+        <string>COMPONENT_APPISTOL_VARMOD_LUXE</string>
+      </AvailableComponents>
+      <AttachmentPositionOffset>
+        <X>0</X>
+        <Y>0</Y>
+        <Z>0</Z>
+      </AttachmentPositionOffset>
+      <AttachmentRotationOffset>
+        <X>0</X>
+        <Y>0</Y>
+        <Z>0</Z>
+      </AttachmentRotationOffset>
+    </AddonWeapon>
+  </Weapons>
+  <LuxuryComponents>
+    <string>COMPONENT_APPISTOL_VARMOD_LUXE</string>
+  </LuxuryComponents>
+</Addon>

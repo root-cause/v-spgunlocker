@@ -48,6 +48,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\Addon.cs" />
+    <Compile Include="Weapons.cs" />
+    <Compile Include="Classes\AddonWeapon.cs" />
     <Compile Include="Classes\AllowedWeapon.cs" />
     <Compile Include="Classes\Locker.cs" />
     <Compile Include="Classes\LockerWeapon.cs" />

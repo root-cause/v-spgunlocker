@@ -89,6 +89,7 @@ namespace SPGunLocker
             if (!GunLockersLoaded && !Game.IsLoading && Game.Player.CanControlCharacter)
             {
                 GunLockersLoaded = true;
+                Methods.LoadAddonWeapons();
                 Methods.LoadGunLockers();
             }
 
@@ -136,7 +137,7 @@ namespace SPGunLocker
 
                             if (GunLockers[ InteractableLockerGuid.Value ].Weapons[i] != null)
                             {
-                                title = Constants.AllowedWeapons[ GunLockers[ InteractableLockerGuid.Value ].Weapons[i].Hash ].DisplayName;
+                                title = Weapons.GetDisplayName(GunLockers[ InteractableLockerGuid.Value ].Weapons[i].Hash);
                             }
 
                             SPGLWeaponsMenu.AddItem(new UIMenuItem(title));
@@ -268,13 +269,13 @@ namespace SPGunLocker
                     }
 
                     Weapon currentWeapon = Game.Player.Character.Weapons.Current;
-                    if (!Constants.AllowedWeapons.ContainsKey(currentWeapon.Hash))
+                    if (!Weapons.IsAllowed(currentWeapon.Hash))
                     {
                         UI.Notify("~r~You can't store this weapon.");
                         return;
                     }
 
-                    if (Methods.GetSlotWeaponType(index) != Constants.AllowedWeapons[ currentWeapon.Hash ].SlotType)
+                    if (Methods.GetSlotWeaponType(index) != Weapons.GetSlotType(currentWeapon.Hash))
                     {
                         UI.Notify("~r~You can't store this weapon on the selected slot.");
                         return;
@@ -291,7 +292,7 @@ namespace SPGunLocker
                     locker.Weapons[index].CreateProp(locker.WorldProp, index);
                     locker.Save();
 
-                    selectedItem.Text = Constants.AllowedWeapons[ currentWeapon.Hash ].DisplayName;
+                    selectedItem.Text = Weapons.GetDisplayName(currentWeapon.Hash);
                     selectedItem.Description = string.Empty;
 
                     Game.Player.Character.Weapons.Remove(currentWeapon);

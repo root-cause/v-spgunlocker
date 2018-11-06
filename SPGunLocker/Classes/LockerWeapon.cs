@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using GTA;
+using GTA.Math;
 using GTA.Native;
 
 namespace SPGunLocker.Classes
@@ -10,7 +11,40 @@ namespace SPGunLocker.Classes
     public class LockerWeapon
     {
         #region Properties
+        [XmlIgnore]
         public WeaponHash Hash { get; set; }
+
+        [XmlElement("Hash")]
+        public string HashString
+        {
+            get
+            {
+                return Hash.ToString();
+            }
+
+            set
+            {
+                // spaghetti time
+                WeaponHash tempHash;
+                if (Enum.TryParse(value, out tempHash))
+                {
+                    Hash = tempHash;
+                }
+                else
+                {
+                    int hashValue = -1;
+                    if (int.TryParse(value, out hashValue))
+                    {
+                        Hash = (WeaponHash)hashValue;
+                    }
+                    else
+                    {
+                        UI.Notify($"~r~{value} is an invalid weapon.");
+                    }
+                }
+            }
+        }
+
         public int Ammo { get; set; }
 
         public int Tint { get; set; }
@@ -24,7 +58,7 @@ namespace SPGunLocker.Classes
         public void CreateProp(Prop rackProp, int slot)
         {
             // Load the weapon model
-            Methods.RequestWeaponAsset(Hash);
+            Methods.RequestWeaponAsset(Hash, 2000);
 
             // Use the luxury model if the weapon has the luxury component
             int luxeModel = Methods.GetWeaponLuxuryModel(Components);
@@ -49,11 +83,13 @@ namespace SPGunLocker.Classes
             }
 
             // Attach to the gun locker prop
+            Tuple<Vector3, Vector3> attachmentOffset = Weapons.GetOffsets(Hash);
+
             _worldProp.AttachTo(
                 rackProp,
                 0,
-                Constants.AttachmentOffsets[slot].Item1 + Constants.AllowedWeapons[Hash].AttachmentExtra.Item1,
-                Constants.AttachmentOffsets[slot].Item2 + Constants.AllowedWeapons[Hash].AttachmentExtra.Item2
+                Constants.AttachmentOffsets[slot].Item1 + attachmentOffset.Item1,
+                Constants.AttachmentOffsets[slot].Item2 + attachmentOffset.Item2
             );
 
             // Free the requested stuff
