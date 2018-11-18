@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Collections.Generic;
 using System.Drawing;
 using GTA;
@@ -24,6 +23,7 @@ namespace SPGunLocker
         MenuPool SPGLMenuPool = null;
         UIMenu SPGLMainMenu = null;
         UIMenu SPGLWeaponsMenu = null;
+        UIMenu SPGLSellConfirmationMenu = null;
         #endregion
 
         #region Config Variables
@@ -62,24 +62,31 @@ namespace SPGunLocker
 
             SPGLMainMenu = new UIMenu("", "~b~GUN LOCKER", Point.Empty, "shopui_title_gr_gunmod", "shopui_title_gr_gunmod");
             SPGLWeaponsMenu = new UIMenu("", "~b~GUN LOCKER: ~w~WEAPONS", Point.Empty, "shopui_title_gr_gunmod", "shopui_title_gr_gunmod");
+            SPGLSellConfirmationMenu = new UIMenu("", "~b~GUN LOCKER: ~w~REFUND CONFIRMATION", Point.Empty, "shopui_title_gr_gunmod", "shopui_title_gr_gunmod");
 
             UIMenuItem putLinkItem = new UIMenuItem("Put", "Put a weapon to the gun locker.");
             UIMenuItem takeLinkItem = new UIMenuItem("Take", "Take a weapon from the gun locker.");
+            UIMenuItem sellItem = new UIMenuItem("Refund", "Return the gun locker and get your money back. Will take you to the confirmation menu.");
             SPGLMainMenu.AddItem(putLinkItem);
             SPGLMainMenu.AddItem(takeLinkItem);
-            SPGLMainMenu.AddItem(new UIMenuItem("Refund", "Return the gun locker and get your money back."));
+            SPGLMainMenu.AddItem(sellItem);
+            SPGLSellConfirmationMenu.AddItem(new UIMenuItem("Confirm", "You'll be refunded the amount displayed on right. ~r~Weapons inside the gun locker will be lost!"));
+            SPGLSellConfirmationMenu.AddItem(new UIMenuItem("Cancel", "Go back to the main menu."));
 
             SPGLMainMenu.BindMenuToItem(SPGLWeaponsMenu, putLinkItem);
             SPGLMainMenu.BindMenuToItem(SPGLWeaponsMenu, takeLinkItem);
+            SPGLMainMenu.BindMenuToItem(SPGLSellConfirmationMenu, sellItem);
 
             SPGLMenuPool.Add(SPGLMainMenu);
             SPGLMenuPool.Add(SPGLWeaponsMenu);
+            SPGLMenuPool.Add(SPGLSellConfirmationMenu);
 
             // Event handlers
             Tick += Script_Tick;
             Aborted += Script_Aborted;
             SPGLMainMenu.OnItemSelect += MainMenu_OnItemSelect;
             SPGLWeaponsMenu.OnItemSelect += WeaponsMenu_OnItemSelect;
+            SPGLSellConfirmationMenu.OnItemSelect += SellConfirmationMenu_OnItemSelect;
         }
 
         #region Event: Tick
@@ -126,6 +133,7 @@ namespace SPGunLocker
                     else
                     {
                         SPGLMainMenu.RefreshIndex();
+                        SPGLSellConfirmationMenu.RefreshIndex();
                         SPGLMainMenu.Visible = true;
 
                         // Update the weapons menu
@@ -142,6 +150,9 @@ namespace SPGunLocker
 
                             SPGLWeaponsMenu.AddItem(new UIMenuItem(title));
                         }
+
+                        // Update the refund menu price
+                        SPGLSellConfirmationMenu.MenuItems[0].SetRightLabel($"~HUD_COLOUR_GREENDARK~${GunLockers[ InteractableLockerGuid.Value ].RefundValue}");
                     }
                 }
                 else
@@ -200,6 +211,7 @@ namespace SPGunLocker
             SPGLMenuPool = null;
             SPGLMainMenu = null;
             SPGLWeaponsMenu = null;
+            SPGLSellConfirmationMenu = null;
         }
         #endregion
 
@@ -221,30 +233,6 @@ namespace SPGunLocker
                 {
                     MenuInteractionType = InteractionType.Take;
                     SPGLWeaponsMenu.RefreshIndex();
-                    break;
-                }
-
-                // Refund
-                case 2:
-                {
-                    if (InteractableLockerGuid == null || !GunLockers.ContainsKey(InteractableLockerGuid.Value)) return;
-                    Locker locker = GunLockers[ InteractableLockerGuid.Value ];
-
-                    if (locker.Weapons.Count(w => w != null) > 0)
-                    {
-                        UI.Notify("~r~Take out the stored weapons first.");
-                        return;
-                    }
-
-                    Game.Player.Money += locker.RefundValue;
-                    UI.Notify($"Returned the gun locker for ~g~${locker.RefundValue}.");
-
-                    SPGLMenuPool.CloseAllMenus();
-                    locker.DestroyProp();
-                    GunLockers.Remove(InteractableLockerGuid.Value);
-                    File.Delete(locker.FilePath);
-
-                    InteractableLockerGuid = null;
                     break;
                 }
             }
@@ -328,6 +316,37 @@ namespace SPGunLocker
                     locker.Save();
 
                     selectedItem.Text = $"Empty Slot ({Methods.GetSlotWeaponType(index)})";
+                    break;
+                }
+            }
+        }
+        #endregion
+
+        #region Event: SellConfirmationMenu_OnItemSelect
+        public void SellConfirmationMenu_OnItemSelect(UIMenu menu, UIMenuItem selectedItem, int index)
+        {
+            switch (index)
+            {
+                case 0:
+                {
+                    if (InteractableLockerGuid == null || !GunLockers.ContainsKey(InteractableLockerGuid.Value)) return;
+                    Locker locker = GunLockers[ InteractableLockerGuid.Value ];
+
+                    Game.Player.Money += locker.RefundValue;
+                    UI.Notify($"Returned the gun locker for ~g~${locker.RefundValue}.");
+
+                    SPGLMenuPool.CloseAllMenus();
+                    locker.DestroyProp();
+                    GunLockers.Remove(InteractableLockerGuid.Value);
+                    File.Delete(locker.FilePath);
+
+                    InteractableLockerGuid = null;
+                    break;
+                }
+
+                case 1:
+                {
+                    SPGLSellConfirmationMenu.GoBack();
                     break;
                 }
             }
